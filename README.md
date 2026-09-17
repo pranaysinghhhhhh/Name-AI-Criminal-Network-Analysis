@@ -6,6 +6,40 @@ in the requirements: it ingests multi-source case data, extracts entities,
 builds a relationship graph, ranks key influencers, flags suspicious patterns,
 and produces investigator-facing visual outputs.
 
+### macOS / Linux Setup & Execution
+
+1. Open the project folder in VS Code / Cursor:
+```bash
+cd Crime-Network-Intelligence-System
+```
+
+2. Create and activate a virtual environment:
+```bash
+python3 -m venv .venv
+source .venv/bin/activate
+python -m pip install --upgrade pip
+python -m pip install -r requirements.txt
+```
+
+3. Install frontend dependencies:
+```bash
+npm --prefix frontend install
+```
+
+4. Start the API in one terminal:
+```bash
+source .venv/bin/activate
+uvicorn server.main:app --reload --host 127.0.0.1 --port 8000
+```
+
+5. Start the dashboard in a second terminal:
+```bash
+npm --prefix frontend run dev
+```
+
+Open http://localhost:5173. The API health check is available at
+http://127.0.0.1:8000/api/health.
+
 ### Windows Setup & Execution
 
 1. Open the project folder in VS Code / Cursor:
