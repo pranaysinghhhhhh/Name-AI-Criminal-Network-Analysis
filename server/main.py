@@ -38,6 +38,11 @@ app.add_middleware(
 )
 
 
+class LoginRequest(BaseModel):
+    username: str
+    password: str
+
+
 @app.get("/api/health")
 def health_check():
     return {
@@ -45,6 +50,35 @@ def health_check():
         "system": "Crime Network Intelligence System",
         "phase": "Phase 2A",
         "engine_cached": IntelligenceService._cached_data is not None,
+    }
+
+
+@app.post("/api/auth/login")
+def login(credentials: LoginRequest):
+    username = credentials.username.strip()
+    password = credentials.password
+
+    if not username:
+        raise HTTPException(status_code=400, detail="Please enter your email or username.")
+    if not password:
+        raise HTTPException(status_code=400, detail="Please enter your password.")
+
+    if len(password) < 4:
+        raise HTTPException(status_code=401, detail="Invalid email/username or password.")
+
+    token = f"cnis_session_{abs(hash(username)) % 100000000:08d}"
+    clean_name = username.split('@')[0].replace('.', ' ').replace('_', ' ').title() if '@' in username else username.replace('.', ' ').replace('_', ' ').title()
+
+    return {
+        "status": "success",
+        "token": token,
+        "user": {
+            "username": username,
+            "name": clean_name,
+            "role": "Intelligence Analyst",
+            "unit": "Crime Network Investigation Desk",
+            "access_level": "Tier-3 Authorized",
+        }
     }
 
 
@@ -669,6 +703,15 @@ def get_fir_legal_provisions():
     Registered BEFORE /api/fir/{fir_id} to prevent route shadowing.
     """
     return IntelligenceService.get_fir_legal_provisions()
+
+
+@app.get("/api/fir/suggest-bns")
+def suggest_bns_provisions(category: Optional[str] = None, narrative: Optional[str] = None):
+    """
+    Returns dynamic BNS 2023 legal-provision suggestions based on incident category and narrative.
+    Registered BEFORE /api/fir/{fir_id} to prevent route shadowing.
+    """
+    return IntelligenceService.suggest_bns_provisions(category=category or "", narrative=narrative or "")
 
 
 @app.get("/api/fir/kpis")
